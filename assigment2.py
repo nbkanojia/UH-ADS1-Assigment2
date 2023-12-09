@@ -82,8 +82,26 @@ def normalise_data(df):
     return df_n
 
 
+def plot_and_save_line_chart(fig_name,title,xlabel,ylabel,df):
+    plt.figure(figsize=(10, 6))
+    ap = df.plot( title=title)
+    #ap.set_ylim(0,100)
+    ap.set_xlabel(xlabel)
+    ap.set_ylabel(ylabel)
+    fig = ap.get_figure()
+    fig.savefig(fig_name)
+    
+def plot_and_save_bar_chart(fig_name,title,xlabel,ylabel,df):
+    plt.figure(figsize=(10, 6))
+    ap = df.plot.bar( title=title)
+    #ap.set_ylim(0,100)
+    ap.set_xlabel(xlabel)
+    ap.set_ylabel(ylabel)
+    fig = ap.get_figure()
+    fig.savefig(fig_name)
+
 #def marge_country_with_other_parameter(df, country, )
-def heat_map(country, dict_label_dataset):
+def plot_and_save_heat_map(country, dict_label_dataset):
     """
     
 
@@ -101,7 +119,7 @@ def heat_map(country, dict_label_dataset):
     None.
 
     """
-    plt.figure()
+    plt.figure(figsize=(10, 6))
     result = pd.DataFrame()
     for lbl in dict_label_dataset:
         result[lbl] = dict_label_dataset[lbl][[country]].values.flatten().tolist()
@@ -125,15 +143,12 @@ def heat_map(country, dict_label_dataset):
     for (i, j), z in np.ndenumerate(corr):
         plt.text(j, i, '{:0.2f}'.format(z), ha='center', va='center')
     plt.title(country)     
-        
+    plt.savefig(country+".png")   
     
 ###### Main Function ################
 
 frst_lnd_data_yw, frst_lnd_data_cw = \
     read_data("API_AG.LND.FRST.ZS_DS2_en_csv_v2_5994693.csv")
-    
-green_gas_data_yw, green_gas_data_cw = \
-    read_data("API_EN.ATM.GHGT.KT.CE_DS2_en_csv_v2_5995567.csv")
     
 gdp_data_yw, gdp_data_cw = \
         read_data("API_NY.GDP.MKTP.CD_DS2_en_csv_v2_6011335.csv")
@@ -145,7 +160,7 @@ total_population_data_yw, total_population_data_cw = \
         read_data("API_SP.POP.TOTL_DS2_en_csv_v2_6011311.csv")
 
 ele_data_yw, ele_population_data_cw = \
-        read_data("API_EG.ELC.FOSL.ZS_DS2_en_csv_v2_5995534.csv")
+        read_data("API_EG.USE.ELEC.KH.PC_DS2_en_csv_v2_5995551.csv")
         
 agri_lnd_yw, agri_lnd_cw = \
         read_data("API_AG.LND.AGRI.ZS_DS2_en_csv_v2_5995314.csv")
@@ -154,22 +169,19 @@ arab_lnd_yw, arab_lnd_cw = \
         read_data("API_AG.LND.ARBL.ZS_DS2_en_csv_v2_5995308.csv")    
         
 
-        
 
-
-fig, axes = plt.subplots(1, 2,figsize=(30, 10))
-
-ap = frst_lnd_data_yw.plot( title="forest_lnd",ax=axes[0])
-#ap.set_ylim(0,100)
+plot_and_save_line_chart("forest.png","Forest area (% of land area)","Year", "%", frst_lnd_data_yw)
 
 co2_data_yw_n = normalise_data(co2_data_yw)
-gg = co2_data_yw_n.rolling(5).mean().plot( title="co2",ax=axes[1])
+plot_and_save_line_chart("co2.png","CO2 emissions (kt)","Year", "kt", co2_data_yw_n)
 
 
-result = {
+plot_and_save_line_chart("electric.png","Electric power consumption (kWh per capita)","Year", "kWh", ele_data_yw)
+plot_and_save_line_chart("population.png","Population, total","Year", "", ele_data_yw)
+
+dict_heat_map = {
         "forest land" : frst_lnd_data_yw,
         "co2" : co2_data_yw,
-        "green gas" : green_gas_data_yw,
         "gdp" : gdp_data_yw,
         "total population" : total_population_data_yw,
         "electricity" : ele_data_yw,
@@ -177,7 +189,8 @@ result = {
         "Arable land(%)" : arab_lnd_yw
     }
 
-heat_map("Argentina",result )
-heat_map("Brazil",result )
+plot_and_save_heat_map("Argentina",dict_heat_map )
+plot_and_save_heat_map("Brazil",dict_heat_map )
+plot_and_save_heat_map("Nigeria",dict_heat_map )
 
 plt.show()
