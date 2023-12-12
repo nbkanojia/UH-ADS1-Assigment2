@@ -13,23 +13,23 @@ import matplotlib.pyplot as plt
 def read_world_bank_csv(filename):
     """
     Accept the csv filename with worldbank data format.
-    Read file and processes and prepare two dataframes by yeas as index
-    and country as index.
+    Read a file and processes and prepare two dataframes by yeas as index
+    and country as an index.
 
     Parameters
     ----------
     filename : string
-        nput the csv file name..
+        input the csv file name..
 
     Returns
     -------
     df_year_index : pandas.DataFrame
-        DataFrame with years as index.
+        DataFrame with years as an index.
     df_country_index : pandas.DataFrame
-        DataFrame with country as index.
+        DataFrame with the country as an index.
 
     """
-    # set year range and country list to filter dataset
+    # set year range and country list to filter the dataset
     start_from_yeart = 1990
     end_to_year = 2020
     countrie_list = ["Brazil", "Indonesia", "Russian Federation", "Argentina",
@@ -42,7 +42,7 @@ def read_world_bank_csv(filename):
     # clean na data, remove columns
     wb_df.dropna(axis=1)
 
-    # prepare column list to select from dataset
+    # prepare a column list to select from the dataset
     years_column_list = np.arange(
         start_from_yeart, (end_to_year+1)).astype(str)
     all_cols_list = ["Country Name"] + list(years_column_list)
@@ -52,14 +52,14 @@ def read_world_bank_csv(filename):
         wb_df["Country Name"].isin(countrie_list),
         all_cols_list]
 
-    # make country as index and then drop column as it is become index
+    # make the country as index and then drop column as it becomes index
     df_country_index.index = df_country_index["Country Name"]
     df_country_index.drop("Country Name", axis=1, inplace=True)
 
     # convert year columns as interger
     df_country_index.columns = df_country_index.columns.astype(int)
 
-    # Transpose dataframe and make country as index
+    # Transpose dataframe and make the country as an index
     df_year_index = pd.DataFrame.transpose(df_country_index)
 
     # return the two dataframes year as index and country as index
@@ -68,7 +68,7 @@ def read_world_bank_csv(filename):
 
 def normalise_data(df_to_normal):
     """
-    Normalise the dataset within 0 to 100 range.
+    Normalise the dataset within the 0 to 100 range.
 
     Parameters
     ----------
@@ -218,28 +218,35 @@ def plot_and_save_heatmap(country, dict_label_dataset):
     # create blank dataframe
     result = pd.DataFrame()
     
-    
+    # loop through the all paramters in dictionary and prepare dataframe
     for lbl in dict_label_dataset:
         result[lbl] = dict_label_dataset[lbl][[
             country]].values.flatten().tolist()
-
+    
+    # find the correlation between paramters
     corr = result.corr().round(2)
+    
+    # create heatmap
     plt.figure()
     plt.imshow(corr, vmin=-1, vmax=1)
-
     plt.xticks(range(len(corr.columns)), corr.columns, rotation=90)
     plt.yticks(range(len(corr.columns)), corr.columns)
-
+    
     cbar = plt.colorbar()
-    cbar.set_ticks(np.arange(1, -1.25, -0.25))  # Set specific tick positions
+    # set specific tick positions
+    cbar.set_ticks(np.arange(1, -1.25, -0.25))  
 
+    # print boxes
     for i in range(0, len(dict_label_dataset)-1):
         plt.axhline(i + 0.5, color='black', linewidth=1)
         plt.axvline(i + 0.5, color='black', linewidth=1)
 
+    # display correlation values in boxes
     for (i, j), corr_val in np.ndenumerate(corr):
         plt.text(j, i, f'{corr_val:0.2f}', ha='center', va='center')
     plt.title(country)
+    
+    # save file in disk
     plt.savefig(country+".png", dpi=300, bbox_inches="tight")
 
 
@@ -267,24 +274,23 @@ agri_lnd_yw, agri_lnd_cw = \
 arab_lnd_yw, arab_lnd_cw = \
     read_world_bank_csv("API_AG.LND.ARBL.ZS_DS2_en_csv_v2_5995308.csv")
 
-# print statics
+# print statics summary
 print_statics_summary("Forest land statics", frst_lnd_data_yw, "Argentina")
 print_statics_summary("CO2", co2_data_yw)
 
-# plot chats
+# plot charts bar chart for Forest area and CO2emissions
 plot_and_save_bar_chart(frst_lnd_data_cw, "Forest area (% of land area)",
                         "", "%", "forest.png")
-
 plot_and_save_bar_chart(co2_data_cw, "CO2 emissions (kt)", "", "kt", "co2.png")
 
-
+# plot line charts for Electric power consumption and Population
 plot_and_save_line_chart(ele_data_yw,
                          "Electric power consumption (kWh per capita)", "Year",
                          "kWh", "electric.png")
 plot_and_save_line_chart(ele_data_yw, "Population, total", "Year", "",
                          "population.png")
 
-# prepare heat map dictonary label with it's dataframe
+# prepare heat map dictonary label with it's dataframe object
 dict_heat_map = {
     "forest land": frst_lnd_data_yw,
     "co2": co2_data_yw,
@@ -295,10 +301,10 @@ dict_heat_map = {
     "Arable land(%)": arab_lnd_yw
 }
 
-# plot heat map
+# plot heat map for differnt countries
 plot_and_save_heatmap("Argentina", dict_heat_map)
 plot_and_save_heatmap("Brazil", dict_heat_map)
 plot_and_save_heatmap("Nigeria", dict_heat_map)
 
-
+#show all plots
 plt.show()
