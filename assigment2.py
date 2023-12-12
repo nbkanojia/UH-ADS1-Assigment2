@@ -12,22 +12,24 @@ import matplotlib.pyplot as plt
 
 def read_world_bank_csv(filename):
     """
-    Accept the filename and reads csv in worldbank data formate. 
-
-    and processes and prepare two dataframes by yeas as columns and country 
-    as columns.
+    Accept the csv filename with worldbank data format.
+    Read file and processes and prepare two dataframes by yeas as index
+    and country as index.
 
     Parameters
     ----------
     filename : string
-        input the file name.
+        nput the csv file name..
 
     Returns
     -------
-    pandas dataframe
-        return two dataframes.
+    df_year_index : pandas.DataFrame
+        DataFrame with years as index.
+    df_country_index : pandas.DataFrame
+        DataFrame with country as index.
 
     """
+    # set year range and country list to filter dataset
     start_from_yeart = 1990
     end_to_year = 2020
     countrie_list = ["Brazil", "Indonesia", "Russian Federation", "Argentina",
@@ -36,178 +38,192 @@ def read_world_bank_csv(filename):
     # read csv using pandas
     wb_df = pd.read_csv(filename,
                         skiprows=3, iterator=False)
+
+    # clean na data, remove columns
     wb_df.dropna(axis=1)
+
+    # prepare column list to select from dataset
     years_column_list = np.arange(
         start_from_yeart, (end_to_year+1)).astype(str)
     all_cols_list = ["Country Name"] + list(years_column_list)
 
-    # Filter data: select only specific countries and years
+    # filter data: select only specific countries and years
     df_country_index = wb_df.loc[
         wb_df["Country Name"].isin(countrie_list),
         all_cols_list]
-    
-    #make country as index
+
+    # make country as index and then drop column as it is become index
     df_country_index.index = df_country_index["Country Name"]
-    # remove first row as it is become index
     df_country_index.drop("Country Name", axis=1, inplace=True)
-   
-    #convert year columns as interger
+
+    # convert year columns as interger
     df_country_index.columns = df_country_index.columns.astype(int)
 
-    # Transpose
+    # Transpose dataframe and make country as index
     df_year_index = pd.DataFrame.transpose(df_country_index)
-   
+
+    # return the two dataframes year as index and country as index
     return df_year_index, df_country_index
 
 
-def normalise_data(df):
+def normalise_data(df_to_normal):
     """
-
+    Normalise the dataset within 0 to 100 range.
 
     Parameters
     ----------
-    df : TYPE
-        DESCRIPTION.
+    df_to_normal : pandas.DataFrame
+        dataframe to be normalise
 
     Returns
     -------
-    df_n : TYPE
-        DESCRIPTION.
+    df_nornal : pandas.DataFrame
+        normalise data.
 
     """
-    # dfmin = np.min(np.min(df))
-    # dfmax = np.max(np.max(df))
-    dfmin = df.min()
-    dfmax = df.max()
-    df_n = (df-dfmin)/(dfmax-dfmin) * 100
-    return df_n
+    # get the min and max from the data
+    dfmin = df_to_normal.min()
+    dfmax = df_to_normal.max()
+
+    # apply formula and normalise data
+    df_nornal = (df_to_normal-dfmin)/(dfmax-dfmin) * 100
+    return df_nornal
 
 
-def print_statics(title, df, country="All"):
+def print_statics_summary(title, df_for_stat, country="All"):
     """
-    
+    Shoe statics summary of dataset like describe function output, kurtosis,
+    skew and median
 
     Parameters
     ----------
-    title : TYPE
-        DESCRIPTION.
-    df : TYPE
-        DESCRIPTION.
+    title : string
+        Title of the summary.
+    df_for_stat : pandas.DataFrame
+        dataframe for which statics summary display.
+    country : string, optional
+        filter summery for specify country. The default is "All".
 
     Returns
     -------
     None.
 
     """
-    if(country!="All"):
-        df = df[country]
-        title = title+"(" + country +")"
-    print("\n====",  (title+" ").ljust(65, "=")  )
-    
-    
-    
-    # print describe function,it will display count, mean, std, min..etc 
-    df_describe = df.describe()
-    
-    # add two other statics method kurtosis 
-    # to see the tailedness vs heavy tails 
-    # and skew to see skewness(Negative, Positive , Zero)
-    df_describe.loc["kurtosis"]  = df.kurtosis()
-    df_describe.loc["skew"]  = df.skew()
-    df_describe.loc["median"]  = df.median()
+    # check if country is passed in parameter, then filter the supplied
+    # dataframe else process all country
+    if (country != "All"):
+        df_for_stat = df_for_stat[country]
+        title = title+"(" + country + ")"
+    print("\n====",  (title+" ").ljust(65, "="))
 
+    # print describe function,it will display count, mean, std, min..etc
+    df_describe = df_for_stat.describe()
+
+    # add three other statics method kurtosis
+    # to see the tailedness vs heavy tails
+    # and skew to see skewness(Negative, Positive , Zero) and median
+    df_describe.loc["kurtosis"] = df_for_stat.kurtosis()
+    df_describe.loc["skew"] = df_for_stat.skew()
+    df_describe.loc["median"] = df_for_stat.median()
+
+    # print summary
     print(df_describe)
-    print("".ljust(70, "=") ,"\n")
+    print("".ljust(70, "="), "\n")
 
 
-def plot_and_save_line_chart(fig_name, title, xlabel, ylabel, df):
+def plot_and_save_line_chart(df_chart, title, xlabel, ylabel, fig_name):
     """
-    
+    Create line chart using df_chart dataframe and save the figure on disk.
 
     Parameters
     ----------
-    fig_name : TYPE
-        DESCRIPTION.
-    title : TYPE
-        DESCRIPTION.
-    xlabel : TYPE
-        DESCRIPTION.
-    ylabel : TYPE
-        DESCRIPTION.
-    df : TYPE
-        DESCRIPTION.
+    df_chart : pandas.DataFrame
+        create line chart for df_chart.
+    title : string
+        title of the chart.
+    xlabel : string
+        set x label.
+    ylabel : string
+        set y label.
+    fig_name : string
+        chart image name.
 
     Returns
     -------
     None.
 
     """
-    plt.figure(figsize=(10, 6))
-    ap = df.plot(title=title)
-    # ap.set_ylim(0,100)
+    # plot line chart and set xlabel and ylabel
+    plt.figure()
+    plot = df_chart.plot(title=title)
+    plot.set_xlabel(xlabel)
+    plot.set_ylabel(ylabel)
     
-    ap.set_xlabel(xlabel)
-    ap.set_ylabel(ylabel)
-    fig = ap.get_figure()
-    fig.savefig(fig_name, dpi=300)
+    # get figure object from pandas plot and save the image on disk
+    fig = plot.get_figure()
+    fig.savefig(fig_name, dpi=300, bbox_inches="tight")
 
 
-def plot_and_save_bar_chart(fig_name, title, xlabel, ylabel, df):
+def plot_and_save_bar_chart(df_chart, title, xlabel, ylabel, fig_name):
     """
-    
+    Create bar chart using df_chart dataframe and save the figure on disk.
 
     Parameters
     ----------
-    fig_name : TYPE
-        DESCRIPTION.
-    title : TYPE
-        DESCRIPTION.
-    xlabel : TYPE
-        DESCRIPTION.
-    ylabel : TYPE
-        DESCRIPTION.
-    df : TYPE
-        DESCRIPTION.
+    df_chart : pandas.DataFrame
+        create bar chart for df_chart.
+    title : string
+        title of the chart.
+    xlabel : string
+        set x label.
+    ylabel : string
+        set y label.
+    fig_name : string
+        chart image name.
 
     Returns
     -------
     None.
 
     """
-    plt.figure(figsize=(10, 6))
-    ap = df.plot.bar(title=title)
-    # ap.set_ylim(0,100)
-    ap.set_xlabel(xlabel)
-    ap.set_ylabel(ylabel)
-    fig = ap.get_figure()
-    fig.savefig(fig_name, dpi=300)
+    # select specific years only and plot the bar chart
+    plot = df_chart.loc[:, [1990, 2000, 2010, 2020]].plot.bar(title=title,
+                                                                      rot=45)
+    plot.set_xlabel(xlabel)
+    plot.set_ylabel(ylabel)
     
-    
-def plot_and_save_heat_map(country, dict_label_dataset):
-    """
+    # get figure object from pandas plot and save the image on disk
+    fig = plot.get_figure()
+    fig.savefig(fig_name, dpi=300, bbox_inches="tight")
 
+
+def plot_and_save_heatmap(country, dict_label_dataset):
+    """
+    Create heatmap for country with differnt paramters 
+    and display it's correlation.
 
     Parameters
     ----------
-    title : TYPE
-        DESCRIPTION.
-    country : TYPE
-        DESCRIPTION.
-    dict_label_dataset : TYPE
-        DESCRIPTION.
+    country : string
+        filter dataset with country.
+    dict_label_dataset : dict
+        dictionary list of the key pair, where key is parameter name 
+        and values is dataset.
 
     Returns
     -------
     None.
 
     """
-    plt.figure(figsize=(10, 6))
+    # create blank dataframe
     result = pd.DataFrame()
+    
+    
     for lbl in dict_label_dataset:
         result[lbl] = dict_label_dataset[lbl][[
             country]].values.flatten().tolist()
 
-    corr = result.corr(numeric_only=True).round(2)
+    corr = result.corr().round(2)
     plt.figure()
     plt.imshow(corr, vmin=-1, vmax=1)
 
@@ -221,10 +237,10 @@ def plot_and_save_heat_map(country, dict_label_dataset):
         plt.axhline(i + 0.5, color='black', linewidth=1)
         plt.axvline(i + 0.5, color='black', linewidth=1)
 
-    for (i, j), z in np.ndenumerate(corr):
-        plt.text(j, i, '{:0.2f}'.format(z), ha='center', va='center')
+    for (i, j), corr_val in np.ndenumerate(corr):
+        plt.text(j, i, f'{corr_val:0.2f}', ha='center', va='center')
     plt.title(country)
-    plt.savefig(country+".png", dpi=300)
+    plt.savefig(country+".png", dpi=300, bbox_inches="tight")
 
 
 ###### Main Function ################
@@ -252,23 +268,21 @@ arab_lnd_yw, arab_lnd_cw = \
     read_world_bank_csv("API_AG.LND.ARBL.ZS_DS2_en_csv_v2_5995308.csv")
 
 # print statics
-print_statics("Forest land statics",frst_lnd_data_yw,"Argentina")
-print_statics("CO2",co2_data_yw)
+print_statics_summary("Forest land statics", frst_lnd_data_yw, "Argentina")
+print_statics_summary("CO2", co2_data_yw)
 
 # plot chats
-plot_and_save_line_chart("forest.png", "Forest area (% of land area)", "Year",
-                         "%", frst_lnd_data_yw)
+plot_and_save_bar_chart(frst_lnd_data_cw, "Forest area (% of land area)",
+                        "", "%", "forest.png")
 
-co2_data_yw_n = normalise_data(co2_data_yw)
-plot_and_save_line_chart("co2.png", "CO2 emissions (kt)", "Year", "kt",
-                         co2_data_yw_n)
+plot_and_save_bar_chart(co2_data_cw, "CO2 emissions (kt)", "", "kt", "co2.png")
 
 
-plot_and_save_line_chart("electric.png",
+plot_and_save_line_chart(ele_data_yw,
                          "Electric power consumption (kWh per capita)", "Year",
-                         "kWh", ele_data_yw)
-plot_and_save_line_chart("population.png", "Population, total", "Year", "",
-                         ele_data_yw)
+                         "kWh", "electric.png")
+plot_and_save_line_chart(ele_data_yw, "Population, total", "Year", "",
+                         "population.png")
 
 # prepare heat map dictonary label with it's dataframe
 dict_heat_map = {
@@ -281,13 +295,10 @@ dict_heat_map = {
     "Arable land(%)": arab_lnd_yw
 }
 
-#plot heat map
-plot_and_save_heat_map("Argentina", dict_heat_map)
-plot_and_save_heat_map("Brazil", dict_heat_map)
-plot_and_save_heat_map("Nigeria", dict_heat_map)
-
-print(gdp_data_yw)
+# plot heat map
+plot_and_save_heatmap("Argentina", dict_heat_map)
+plot_and_save_heatmap("Brazil", dict_heat_map)
+plot_and_save_heatmap("Nigeria", dict_heat_map)
 
 
 plt.show()
-
