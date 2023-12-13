@@ -318,8 +318,9 @@ print_statics_summary("GDP (current US$)", gdp_data_yw)
 
 # plot charts bar chart for Forest area and CO2emissions
 plot_and_save_bar_chart(frst_lnd_data_cw, "Forest area (% of land area)",
-                        "", "%", "forest.png")
-plot_and_save_bar_chart(co2_data_cw, "CO2 emissions (kt)", "", "kt", "co2.png")
+                        "countries", "% of land area", "forest.png")
+plot_and_save_bar_chart(co2_data_cw, "CO2 emissions (kt)",
+                        "countries", "kt", "co2.png")
 
 
 # plot line charts for Electric power consumption and Population
