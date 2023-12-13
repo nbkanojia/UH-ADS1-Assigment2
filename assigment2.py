@@ -313,8 +313,7 @@ arab_lnd_yw, arab_lnd_cw = \
 # print statics summary
 
 print_statics_summary("Forest land statics", frst_lnd_data_yw, "Argentina")
-print_statics_summary("CO2 emissions", co2_data_yw)
-print_statics_summary("Forest area", frst_lnd_data_yw)
+print_statics_summary("CO2 emissions statics", co2_data_yw)
 print_statics_summary("GDP (current US$)", gdp_data_yw)
 
 # plot charts bar chart for Forest area and CO2emissions
