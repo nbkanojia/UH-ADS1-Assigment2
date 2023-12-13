@@ -8,6 +8,7 @@ Created on Wed Nov 29 20:51:59 2023
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy.stats as sp
 
 
 def read_world_bank_csv(filename):
@@ -93,7 +94,7 @@ def normalise_data(df_to_normal):
 def print_statics_summary(title, df_for_stat, country="All"):
     """
     Shoe statics summary of dataset like describe function output, kurtosis,
-    skew and median
+    skew and median.
 
     Parameters
     ----------
@@ -111,7 +112,7 @@ def print_statics_summary(title, df_for_stat, country="All"):
     """
     # check if country is passed in parameter, then filter the supplied
     # dataframe else process all country
-    if (country != "All"):
+    if country != "All":
         df_for_stat = df_for_stat[country]
         title = title+"(" + country + ")"
     print("\n====",  (title+" ").ljust(65, "="))
@@ -122,8 +123,8 @@ def print_statics_summary(title, df_for_stat, country="All"):
     # add three other statics method kurtosis
     # to see the tailedness vs heavy tails
     # and skew to see skewness(Negative, Positive , Zero) and median
-    df_describe.loc["kurtosis"] = df_for_stat.kurtosis()
-    df_describe.loc["skew"] = df_for_stat.skew()
+    df_describe.loc["kurtosis"] = sp.kurtosis(df_for_stat)
+    df_describe.loc["skew"] = sp.skew(df_for_stat)
     df_describe.loc["median"] = df_for_stat.median()
 
     # print summary
@@ -158,7 +159,7 @@ def plot_and_save_line_chart(df_chart, title, xlabel, ylabel, fig_name):
     plot = df_chart.plot(title=title)
     plot.set_xlabel(xlabel)
     plot.set_ylabel(ylabel)
-    
+
     # get figure object from pandas plot and save the image on disk
     fig = plot.get_figure()
     fig.savefig(fig_name, dpi=300, bbox_inches="tight")
@@ -188,10 +189,43 @@ def plot_and_save_bar_chart(df_chart, title, xlabel, ylabel, fig_name):
     """
     # select specific years only and plot the bar chart
     plot = df_chart.loc[:, [1990, 2000, 2010, 2020]].plot.bar(title=title,
-                                                                      rot=45)
+                                                              rot=45)
     plot.set_xlabel(xlabel)
     plot.set_ylabel(ylabel)
-    
+
+    # get figure object from pandas plot and save the image on disk
+    fig = plot.get_figure()
+    fig.savefig(fig_name, dpi=300, bbox_inches="tight")
+
+
+def plot_and_save_stack_bar_chart(df_chart, title, xlabel, ylabel, fig_name):
+    """
+    Create bar chart using df_chart dataframe and save the figure on disk.
+
+    Parameters
+    ----------
+    df_chart : pandas.DataFrame
+        create bar chart for df_chart.
+    title : string
+        title of the chart.
+    xlabel : string
+        set x label.
+    ylabel : string
+        set y label.
+    fig_name : string
+        chart image name.
+
+    Returns
+    -------
+    None.
+
+    """
+    # select specific years only and plot the bar chart
+    plot = df_chart.loc[:, [1990, 2000, 2010, 2020]]\
+        .plot.bar(title=title, stacked=True, rot=45,)
+    plot.set_xlabel(xlabel)
+    plot.set_ylabel(ylabel)
+
     # get figure object from pandas plot and save the image on disk
     fig = plot.get_figure()
     fig.savefig(fig_name, dpi=300, bbox_inches="tight")
@@ -199,7 +233,7 @@ def plot_and_save_bar_chart(df_chart, title, xlabel, ylabel, fig_name):
 
 def plot_and_save_heatmap(country, dict_label_dataset):
     """
-    Create heatmap for country with differnt paramters 
+    Create heatmap for country with differnt paramters
     and display it's correlation.
 
     Parameters
@@ -207,7 +241,7 @@ def plot_and_save_heatmap(country, dict_label_dataset):
     country : string
         filter dataset with country.
     dict_label_dataset : dict
-        dictionary list of the key pair, where key is parameter name 
+        dictionary list of the key pair, where key is parameter name
         and values is dataset.
 
     Returns
@@ -217,24 +251,24 @@ def plot_and_save_heatmap(country, dict_label_dataset):
     """
     # create blank dataframe
     result = pd.DataFrame()
-    
+
     # loop through the all paramters in dictionary and prepare dataframe
     for lbl in dict_label_dataset:
         result[lbl] = dict_label_dataset[lbl][[
             country]].values.flatten().tolist()
-    
+
     # find the correlation between paramters
     corr = result.corr().round(2)
-    
+
     # create heatmap
     plt.figure()
-    plt.imshow(corr, vmin=-1, vmax=1)
+    plt.imshow(corr, vmin=-1, vmax=1, cmap="Wistia")
     plt.xticks(range(len(corr.columns)), corr.columns, rotation=90)
     plt.yticks(range(len(corr.columns)), corr.columns)
-    
+
     cbar = plt.colorbar()
     # set specific tick positions
-    cbar.set_ticks(np.arange(1, -1.25, -0.25))  
+    cbar.set_ticks(np.arange(1, -1.25, -0.25))
 
     # print boxes
     for i in range(0, len(dict_label_dataset)-1):
@@ -243,9 +277,11 @@ def plot_and_save_heatmap(country, dict_label_dataset):
 
     # display correlation values in boxes
     for (i, j), corr_val in np.ndenumerate(corr):
-        plt.text(j, i, f'{corr_val:0.2f}', ha='center', va='center')
+        text = plt.text(j, i, f'{corr_val:0.2f}', ha='center', va='center',
+                        color="Black")
+
     plt.title(country)
-    
+
     # save file in disk
     plt.savefig(country+".png", dpi=300, bbox_inches="tight")
 
@@ -265,7 +301,7 @@ co2_data_yw, co2_data_cw = \
 total_population_data_yw, total_population_data_cw = \
     read_world_bank_csv("API_SP.POP.TOTL_DS2_en_csv_v2_6011311.csv")
 
-ele_data_yw, ele_population_data_cw = \
+ele_data_yw, ele_data_cw = \
     read_world_bank_csv("API_EG.USE.ELEC.KH.PC_DS2_en_csv_v2_5995551.csv")
 
 agri_lnd_yw, agri_lnd_cw = \
@@ -275,20 +311,25 @@ arab_lnd_yw, arab_lnd_cw = \
     read_world_bank_csv("API_AG.LND.ARBL.ZS_DS2_en_csv_v2_5995308.csv")
 
 # print statics summary
-print_statics_summary("Forest land statics", frst_lnd_data_yw, "Argentina")
+# print_statics_summary("Forest land statics", frst_lnd_data_yw, "Argentina")
 print_statics_summary("CO2", co2_data_yw)
 
 # plot charts bar chart for Forest area and CO2emissions
 plot_and_save_bar_chart(frst_lnd_data_cw, "Forest area (% of land area)",
                         "", "%", "forest.png")
 plot_and_save_bar_chart(co2_data_cw, "CO2 emissions (kt)", "", "kt", "co2.png")
+plot_and_save_stack_bar_chart(ele_data_cw,
+                              "11Electric power consumption (kWh per capital)",
+                              "Year", "kWh", "electric_bar.png")
 
 # plot line charts for Electric power consumption and Population
-plot_and_save_line_chart(ele_data_yw,
-                         "Electric power consumption (kWh per capita)", "Year",
-                         "kWh", "electric.png")
-plot_and_save_line_chart(ele_data_yw, "Population, total", "Year", "",
-                         "population.png")
+plot_and_save_line_chart(ele_data_yw.loc[1995:2015, :],
+                         "Electric power consumption (kWh per capital)",
+                         "Year", "kWh", "electric.png")
+plot_and_save_line_chart(total_population_data_yw, "Population, total", "Year",
+                         "", "population.png")
+plot_and_save_line_chart(gdp_data_yw, "GDP (current US$)", "Year", "Trillion",
+                         "gdp.png")
 
 # prepare heat map dictonary label with it's dataframe object
 dict_heat_map = {
@@ -302,9 +343,13 @@ dict_heat_map = {
 }
 
 # plot heat map for differnt countries
-plot_and_save_heatmap("Argentina", dict_heat_map)
 plot_and_save_heatmap("Brazil", dict_heat_map)
+plot_and_save_heatmap("Indonesia", dict_heat_map)
+plot_and_save_heatmap("Russian Federation", dict_heat_map)
+plot_and_save_heatmap("Argentina", dict_heat_map)
+plot_and_save_heatmap("Paraguay", dict_heat_map)
+plot_and_save_heatmap("Bolivia", dict_heat_map)
 plot_and_save_heatmap("Nigeria", dict_heat_map)
 
-#show all plots
+# show all plots
 plt.show()
