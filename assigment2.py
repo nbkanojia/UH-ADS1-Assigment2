@@ -277,8 +277,8 @@ def plot_and_save_heatmap(country, dict_label_dataset):
 
     # display correlation values in boxes
     for (i, j), corr_val in np.ndenumerate(corr):
-        text = plt.text(j, i, f'{corr_val:0.2f}', ha='center', va='center',
-                        color="Black")
+        plt.text(j, i, f'{corr_val:0.2f}', ha='center', va='center',
+                 color="Black")
 
     plt.title(country)
 
@@ -311,16 +311,18 @@ arab_lnd_yw, arab_lnd_cw = \
     read_world_bank_csv("API_AG.LND.ARBL.ZS_DS2_en_csv_v2_5995308.csv")
 
 # print statics summary
-# print_statics_summary("Forest land statics", frst_lnd_data_yw, "Argentina")
-print_statics_summary("CO2", co2_data_yw)
+
+print_statics_summary("Forest land statics", frst_lnd_data_yw, "Argentina")
+print_statics_summary("CO2 emissions", co2_data_yw)
+print_statics_summary("Forest area", frst_lnd_data_yw)
+print_statics_summary("GDP (current US$)", gdp_data_yw)
+print_statics_summary("Electric power consumption", ele_data_yw)
 
 # plot charts bar chart for Forest area and CO2emissions
 plot_and_save_bar_chart(frst_lnd_data_cw, "Forest area (% of land area)",
                         "", "%", "forest.png")
 plot_and_save_bar_chart(co2_data_cw, "CO2 emissions (kt)", "", "kt", "co2.png")
-plot_and_save_stack_bar_chart(ele_data_cw,
-                              "11Electric power consumption (kWh per capital)",
-                              "Year", "kWh", "electric_bar.png")
+
 
 # plot line charts for Electric power consumption and Population
 plot_and_save_line_chart(ele_data_yw.loc[1995:2015, :],
