@@ -316,7 +316,6 @@ print_statics_summary("Forest land statics", frst_lnd_data_yw, "Argentina")
 print_statics_summary("CO2 emissions", co2_data_yw)
 print_statics_summary("Forest area", frst_lnd_data_yw)
 print_statics_summary("GDP (current US$)", gdp_data_yw)
-print_statics_summary("Electric power consumption", ele_data_yw)
 
 # plot charts bar chart for Forest area and CO2emissions
 plot_and_save_bar_chart(frst_lnd_data_cw, "Forest area (% of land area)",
