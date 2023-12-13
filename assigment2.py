@@ -318,19 +318,19 @@ print_statics_summary("GDP (current US$)", gdp_data_yw)
 
 # plot charts bar chart for Forest area and CO2emissions
 plot_and_save_bar_chart(frst_lnd_data_cw, "Forest area (% of land area)",
-                        "countries", "% of land area", "forest.png")
+                        "country", "% of land area", "forest.png")
 plot_and_save_bar_chart(co2_data_cw, "CO2 emissions (kt)",
-                        "countries", "kt", "co2.png")
+                        "country", "kt", "co2.png")
 
 
 # plot line charts for Electric power consumption and Population
-plot_and_save_line_chart(ele_data_yw.loc[1995:2015, :],
+plot_and_save_line_chart(ele_data_yw.loc[1995:2010, :],
                          "Electric power consumption (kWh per capital)",
-                         "Year", "kWh", "electric.png")
+                         "Year", "kWh per capital", "electric.png")
 plot_and_save_line_chart(total_population_data_yw, "Population, total", "Year",
-                         "", "population.png")
-plot_and_save_line_chart(gdp_data_yw, "GDP (current US$)", "Year", "Trillion",
-                         "gdp.png")
+                         "Total", "population.png")
+plot_and_save_line_chart(gdp_data_yw, "GDP (current US$)", "Year",
+                         "Trillion US$", "gdp.png")
 
 # prepare heat map dictonary label with it's dataframe object
 dict_heat_map = {
